@@ -1,5 +1,5 @@
 Introduction: 
-This prototype, which is used to compute the result R of forgetting some set V of atoms from a give CTL formula F (in the "Filename" below), is implemented in Prolog.   
+This prototype, which is used to compute the result R of forgetting some set V of atoms from a give S5 formula F (in the "Filename" below), is implemented in Prolog.   
  
 
  How to run this prototype?
