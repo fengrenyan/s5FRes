@@ -22,23 +22,24 @@ ksnc :-
 	write("Please input the txt file name!\n"),
 	open('Cresult.txt', write, Str), %trace, 
 	%generate_KBterm(Clause_num), %trace, 
-	read_formula(Formula, P, Q), %trace, write("Formula="), write(Formula), nl,
+	read_formula(Formula1, P, Q), %trace, write("Formula="), write(Formula1), nl,
 	%random(1, Variable_n, Q),
 	%generate_P(Variable_n, P),
 	%generate_P_list(Variable_n, PN, P),
-	%generate_list(1, Variable_n, L1),  %trace, write("L1="), write(L1), nl, % generate the set of prop in formula.
+	%generate_list(1, Variable_n, L1),  %trace, write("L1="), write(L1), nl, %generate the set of prop in formula.
+	Formula = (Formula1 & Q), write("formula="), write(Formula), 
 	gain_prop(Formula, PN1), write("PN1="), write(PN1), nl, 
 	add_propTerm(PN1), append(PN1, [Q],OP), write("OP="), write(OP), nl, 
-	difference_list(P, OP, P1), write("P1="), write(P1), nl, 
-	kForget(Formula, P1, SNC),
+	difference_list(P, OP, P1), sort(P1, P2), write("P2="), write(P2), nl, %!, trace, 
+	kForget1(Formula, P2, SNC),
 	write("P="), write(P), nl,
 	write("Q="), write(Q), nl,
-	write("P1="), write(P1), nl,
-	write("T="), write(Formula), nl,
+	write("P1="), write(P2), nl,
+	write("T="), write(Formula1), nl,
 	write(Str,'P='), write(Str, P), nl(Str), %write(Str,"\n"),
 	write(Str,'Q='), write(Str, Q), nl(Str), %write(Str,"\n"),
-	write(Str,'P1='), write(Str, P1), nl(Str), %write(Str,"\n"),
-	write(Str,'Theory='), write(Str, Formula), nl(Str), %write(Str,"\n"),
+	write(Str,'P1='), write(Str, P2), nl(Str), %write(Str,"\n"),
+	write(Str,'Theory='), write(Str, Formula1), nl(Str), %write(Str,"\n"),
 	write(Str, 'SNC is: '), write(Str, SNC), nl(Str), %write(Str,"\n"),
 	write(Str,'...............................................'), nl(Str),
 	retractall(prop(X)),
@@ -303,6 +304,15 @@ test(F, P, L1, L2, L3, L4,L5) :- mcnf2list(F, List), write(List), nl,
 %----------------------------kForget----------------------------------------
 %kForget(F,[],F) :- !.
 %kForget(F, LP, NEW) :- mcnf2list(F, List), write("List"),write(List),nl, kforget(List, LP, NEW1), supp(NEW1, LP, NEW).
+
+kForget1(F,[],F) :- !.
+kForget1(F, LP, NEW) :- mcnf2Lst(F, List),  write("List"),write(List),nl,
+	find_P1(List, LP, List1),
+	difference_list(List1, List, List2),
+	kforget(List2, LP, NEW1), 
+	supp(NEW1, LP, NEW2), 
+	append(NEW2, List1, NEWK), kcnf2Kwff(NEWK, NEW).
+kForget1(F, LP, NEW) :- mcnf2Lst(F, List), supp(List, LP, NEWK), kcnf2Kwff(NEWK, NEW).
 
 kForget(F,[],F) :- !.
 kForget(F, LP, NEW) :- mcnf2list(F, List),  write("List"),write(List),nl,
@@ -894,7 +904,9 @@ member_list([X|L], P) :- (member(P, X), !; member_list(L, P)).
 
 %----------------mcnf2list--------------------------------------------------------
 
-mcnf2list(F, [KC|L]) :- F =.. [Y|Args], (Y == &), Args = [X, M], kc2list(X, KC), mcnf2list(M, L), !.
+mcnf2Lst(F, [KC|L]) :- F =.. [Y|Args], (Y == &), !, Args = [X, M], kc2list(M, KC), mcnf2list(X, L), !.
+
+mcnf2list(F, [KC|L]) :- F =.. [Y|Args], (Y == &), !, Args = [X, M], kc2list(X, KC), mcnf2list(M, L), !.
 mcnf2list(F, [C]) :- kc2list(F, C).
 
 kc2list(KC, kclause(Cclause, KT, BT)) :- devive(KC, L1, L2, L3), 
